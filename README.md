@@ -128,5 +128,7 @@ routes/
 - Voting menggunakan token sesi untuk mencegah duplikasi
 - Admin dashboard dilindungi autentikasi sesi
 ## Donate 
+Jika project ini bermanfaat, Anda dapat mendukung pengembang melalui Saweria:
 https://saweria.co/Adiiiwidi
+##ThankYou
 
