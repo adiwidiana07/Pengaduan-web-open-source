@@ -127,4 +127,6 @@ routes/
 - Token UUID digunakan untuk verifikasi kepemilikan
 - Voting menggunakan token sesi untuk mencegah duplikasi
 - Admin dashboard dilindungi autentikasi sesi
+## Donate 
+https://saweria.co/Adiiiwidi
 
