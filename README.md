@@ -128,4 +128,3 @@ routes/
 - Voting menggunakan token sesi untuk mencegah duplikasi
 - Admin dashboard dilindungi autentikasi sesi
 
-
