@@ -1,6 +1,32 @@
-# Pengaduan - Layanan Aspirasi & Pengaduan Online
+<div align="center">
+
+# 📢 Pengaduan
+
+### Layanan Aspirasi & Pengaduan Online
+
+[![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?style=flat&logo=php&logoColor=white)](https://www.php.net)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
 Platform pengaduan dan aspirasi masyarakat berbasis web yang memungkinkan pengguna menyampaikan pendapat secara **anonim, transparan, dan real-time**.
+
+</div>
+
+---
+
+## Daftar Isi
+
+- [Fitur](#fitur)
+- [Tech Stack](#tech-stack)
+- [Instalasi](#instalasi)
+- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+- [Akun Admin Default](#akun-admin-default)
+- [Struktur Direktori](#struktur-direktori-utama)
+- [Keamanan](#keamanan)
+- [Lisensi](#lisensi)
+
+---
 
 ## Fitur
 
@@ -21,17 +47,21 @@ Platform pengaduan dan aspirasi masyarakat berbasis web yang memungkinkan penggu
 
 ## Tech Stack
 
-- **Backend:** Laravel 13, PHP 8.3+
-- **Frontend:** Tailwind CSS v4, Vite, Alpine.js-like vanilla JS
-- **Database:** MySQL
-- **Auth:** Session-based authentication
+| Komponen   | Teknologi                          |
+| ---------- | ---------------------------------- |
+| Backend    | Laravel 13, PHP 8.3+              |
+| Frontend   | Tailwind CSS v4, Vite, vanilla JS |
+| Database   | MySQL                              |
+| Auth       | Session-based authentication      |
 
 ## Persyaratan Sistem
 
-- PHP 8.3 atau lebih baru
-- Composer
-- Node.js & npm
-- MySQL 8.0+
+> [!IMPORTANT]
+> Pastikan komputer Anda sudah terinstal:
+> - **PHP 8.3** atau lebih baru
+> - **Composer**
+> - **Node.js** & npm
+> - **MySQL 8.0** atau lebih baru
 
 ## Instalasi
 
@@ -79,12 +109,13 @@ npm run dev
 
 ## Akun Admin Default
 
-Setelah menjalankan seeder:
-
-| Field    | Value              |
-|----------|--------------------|
-| Email    | admin@pengaduan.id |
-| Password | password           |
+> [!NOTE]
+> Setelah menjalankan seeder, gunakan akun berikut untuk login:
+>
+> | Field    | Value              |
+> |----------|--------------------|
+> | 📧 Email | admin@pengaduan.id |
+> | 🔑 Password | password       |
 
 ## Struktur Direktori Utama
 
@@ -131,3 +162,11 @@ routes/
 ## Lisensi
 
 [MIT](https://opensource.org/licenses/MIT)
+
+---
+
+<div align="center">
+
+**Dibuat dengan ❤️ menggunakan Laravel**
+
+</div>
