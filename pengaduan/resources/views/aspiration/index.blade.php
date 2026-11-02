@@ -3,116 +3,99 @@
 @section('title', 'Daftar Aspirasi - Pengaduan')
 
 @section('content')
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-                <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Daftar Aspirasi & Pengaduan</h1>
-                <p class="mt-2 text-sm text-gray-500">Kumpulan aspirasi dari masyarakat secara transparan, demokratis, dan real-time.</p>
-            </div>
-            <a href="{{ route('aspirasi.create') }}" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-lg shadow-sm">
-                + Kirim Aspirasi Baru
+<div class="w-full max-w-4xl mx-auto px-4 sm:px-6 py-12">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+            <h1 class="font-serif text-3xl sm:text-4xl font-bold text-gray-900">Aspirasi warga</h1>
+            <p class="mt-2 text-base text-gray-700">Aspirasi yang bisa dibaca, didukung, dan didiskusikan siapa saja.</p>
+        </div>
+        @unless(auth()->user()?->isAdmin())
+            <a href="{{ route('aspirasi.create') }}"
+               class="inline-flex items-center justify-center min-h-11 px-5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-md">
+                Tulis Aspirasi
             </a>
-        </div>
-
-        @if(session('success'))
-            <div data-flash class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 shadow-sm flex items-center gap-2">
-                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div data-flash class="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 shadow-sm flex items-center gap-2">
-                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <div class="mb-8 bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm">
-            <form action="{{ route('aspirasi.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="md:col-span-2">
-                    <label for="search" class="sr-only">Cari Aspirasi</label>
-                    <div class="relative">
-                        <input type="text" name="search" id="search" placeholder="Cari berdasarkan judul atau isi..." value="{{ request('search') }}" class="w-full pl-4 pr-4 py-2 text-sm border border-gray-300 rounded-xl focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm">
-                    </div>
-                </div>
-
-                <div>
-                    <label for="category_id" class="sr-only">Kategori</label>
-                    <select name="category_id" id="category_id" class="w-full px-4 py-2 text-sm border border-gray-300 rounded-xl focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm">
-                        <option value="">Semua Kategori</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                {{ $category->nama_kategori }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="flex gap-2">
-                    <select name="sort" class="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-xl focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm">
-                        <option value="latest" {{ request('sort') !== 'popular' ? 'selected' : '' }}>Terbaru</option>
-                        <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>Terpopuler</option>
-                    </select>
-                    <button type="submit" class="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-xl shadow-sm">
-                        Filter
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            @forelse($aspirations as $aspiration)
-                <div class="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
-                                {{ $aspiration->category->nama_kategori ?? 'Umum' }}
-                            </span>
-                            <span class="text-xs text-gray-400 font-medium">
-                                {{ $aspiration->created_at->diffForHumans() }}
-                            </span>
-                        </div>
-
-                        <h2 class="text-lg font-bold text-gray-900 hover:text-indigo-600 transition-colors">
-                            <a href="{{ route('aspirasi.show', $aspiration->id) }}">
-                                {{ $aspiration->judul }}
-                            </a>
-                        </h2>
-
-                        <p class="mt-3 text-sm text-gray-600 leading-relaxed line-clamp-3">
-                            {{ $aspiration->isi }}
-                        </p>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                        <div class="flex items-center gap-4">
-                            <span class="inline-flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
-                                👍 {{ $aspiration->upvote }}
-                            </span>
-                            <span class="inline-flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg">
-                                👎 {{ $aspiration->downvote }}
-                            </span>
-                            <span class="inline-flex items-center gap-1 text-gray-600 bg-gray-50 px-2.5 py-1 rounded-lg">
-                                💬 {{ $aspiration->comments->count() }} Komentar
-                            </span>
-                        </div>
-                        <a href="{{ route('aspirasi.show', $aspiration->id) }}" class="font-bold text-indigo-600 hover:underline">
-                            Lihat Detail &rarr;
-                        </a>
-                    </div>
-                </div>
-            @empty
-                <div class="md:col-span-2 bg-white border border-gray-200 rounded-2xl py-16 text-center shadow-sm">
-                    <p class="text-2xl mb-2">📂</p>
-                    <p class="text-sm font-semibold text-gray-900">Belum ada aspirasi ditemukan</p>
-                    <p class="mt-1 text-xs text-gray-500">Silakan sesuaikan filter pencarian atau buat aspirasi baru.</p>
-                </div>
-            @endforelse
-        </div>
-
-        <div class="mt-8">
-            {{ $aspirations->links() }}
-        </div>
+        @endunless
     </div>
+
+    @if(session('success'))
+        <div data-flash role="status" class="mt-6 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div data-flash role="alert" class="mt-6 rounded-md border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{{ session('error') }}</div>
+    @endif
+
+    <form action="{{ route('aspirasi.index') }}" method="GET" role="search"
+          class="mt-8 grid grid-cols-1 sm:grid-cols-[1fr_11rem_9rem_auto] gap-3">
+        <div>
+            <label for="search" class="sr-only">Cari aspirasi</label>
+            <input type="search" name="search" id="search" value="{{ request('search') }}" placeholder="Cari judul atau isi"
+                   class="w-full min-h-11 px-3 text-sm border border-gray-300 rounded-md bg-white focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600">
+        </div>
+        <div>
+            <label for="category_id" class="sr-only">Kategori</label>
+            <select name="category_id" id="category_id"
+                    class="w-full min-h-11 px-3 text-sm border border-gray-300 rounded-md bg-white focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600">
+                <option value="">Semua kategori</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->nama_kategori }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="sort" class="sr-only">Urutkan</label>
+            <select name="sort" id="sort"
+                    class="w-full min-h-11 px-3 text-sm border border-gray-300 rounded-md bg-white focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600">
+                <option value="latest" {{ request('sort') !== 'popular' ? 'selected' : '' }}>Terbaru</option>
+                <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>Paling didukung</option>
+            </select>
+        </div>
+        <button type="submit" class="min-h-11 px-5 text-sm font-semibold text-indigo-700 bg-white border border-indigo-600 hover:bg-indigo-50 transition-colors rounded-md">
+            Terapkan
+        </button>
+    </form>
+
+    @if(request('search') || request('category_id'))
+        <p class="mt-4 text-sm text-gray-700">
+            {{ $aspirations->total() }} aspirasi ditemukan.
+            <a href="{{ route('aspirasi.index') }}" class="inline-flex items-center min-h-11 font-semibold text-indigo-700 underline underline-offset-4">Hapus filter</a>
+        </p>
+    @endif
+
+    <div class="mt-8 border-t-2 border-gray-900">
+        @forelse($aspirations as $aspiration)
+            <article class="py-6 border-b border-gray-200">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <x-doc-no :id="$aspiration->id" />
+                    <span class="text-xs font-semibold text-gray-700 bg-gray-100 rounded px-1.5 py-0.5">{{ $aspiration->category->nama_kategori ?? 'Umum' }}</span>
+                    <span class="text-xs text-gray-600">{{ $aspiration->created_at->diffForHumans() }}</span>
+                </div>
+                <h2 class="mt-2 font-serif text-xl sm:text-2xl font-semibold leading-snug break-words">
+                    <a href="{{ route('aspirasi.show', $aspiration) }}" class="text-gray-900 hover:text-indigo-700">{{ $aspiration->judul }}</a>
+                </h2>
+                <p class="mt-2 text-sm text-gray-700 leading-relaxed line-clamp-2 break-words">{{ $aspiration->isi }}</p>
+                <p class="mt-3 text-sm text-gray-600">
+                    <span class="font-semibold text-emerald-800">{{ $aspiration->upvote }} setuju</span>
+                    <span aria-hidden="true"> · </span>
+                    <span class="font-semibold text-rose-800">{{ $aspiration->downvote }} tidak setuju</span>
+                    <span aria-hidden="true"> · </span>
+                    {{ $aspiration->comments_count }} komentar
+                </p>
+            </article>
+        @empty
+            <div class="py-12">
+                @if(request('search') || request('category_id'))
+                    <p class="text-base font-semibold text-gray-900">Tidak ada aspirasi yang cocok dengan filter ini.</p>
+                    <p class="mt-1 text-sm text-gray-700">Coba kata kunci lain atau pilih semua kategori.</p>
+                @else
+                    <p class="text-base font-semibold text-gray-900">Belum ada aspirasi yang tercatat.</p>
+                    <p class="mt-1 text-sm text-gray-700">Aspirasi pertama akan muncul di sini setelah dikirim.</p>
+                @endif
+            </div>
+        @endforelse
+    </div>
+
+    @if($aspirations->hasPages())
+        <div class="mt-8">{{ $aspirations->links() }}</div>
+    @endif
+</div>
 @endsection

@@ -4,31 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\Aspiration;
 use App\Models\Category;
+use App\Support\AnonymousIdentity;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 class AspirationController extends Controller
 {
     public function index(Request $request)
     {
         $categories = Category::orderBy('nama_kategori')->get();
-        $query = Aspiration::with(['category', 'comments']);
+        $query = Aspiration::with('category')->withCount('comments');
 
-        // Search filter
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
-                  ->orWhere('isi', 'like', "%{$search}%");
+                    ->orWhere('isi', 'like', "%{$search}%");
             });
         }
 
-        // Category filter
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->input('category_id'));
         }
 
-        // Sorting
         if ($request->input('sort') === 'popular') {
             $query->orderByRaw('(upvote - downvote) DESC')->latest();
         } else {
@@ -42,6 +40,8 @@ class AspirationController extends Controller
 
     public function create()
     {
+        Gate::authorize('create', Aspiration::class);
+
         $categories = Category::orderBy('nama_kategori')->get();
 
         return view('aspiration.create', compact('categories'));
@@ -49,122 +49,71 @@ class AspirationController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        Gate::authorize('create', Aspiration::class);
+
+        $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'isi' => 'required|string|max:10000',
             'category_id' => 'required|exists:categories,id',
         ]);
 
-        $ownerToken = (string) Str::uuid();
+        $aspiration = new Aspiration($validated);
+        $aspiration->author_hash = AnonymousIdentity::authorHash($request->user());
+        $aspiration->save();
 
-        $aspiration = Aspiration::create([
-            'judul' => $validatedData['judul'],
-            'isi' => $validatedData['isi'],
-            'category_id' => $validatedData['category_id'],
-            'owner_token' => $ownerToken,
-        ]);
-
-        // Save token to session list so they can edit it easily
-        session()->push('my_aspiration_tokens', $ownerToken);
-
-        return redirect()->route('aspirasi.success', $aspiration->id)->with('owner_token', $ownerToken);
+        return redirect()->route('aspirasi.show', $aspiration)
+            ->with('success', 'Aspirasi berhasil dikirim. Identitas Anda tidak ditampilkan kepada siapa pun, termasuk admin.');
     }
 
-    public function success($id)
+    public function show(Request $request, Aspiration $aspiration)
     {
-        $aspiration = Aspiration::findOrFail($id);
-        $token = session('owner_token') ?? request('token');
+        $aspiration->load(['category', 'comments' => fn ($q) => $q->latest()]);
 
-        if (!$token) {
-            return redirect()->route('aspirasi.show', $aspiration->id);
+        $user = $request->user();
+
+        // Tamu yang menekan Masuk/Daftar dari halaman ini kembali ke aspirasi yang sama.
+        if (! $user) {
+            redirect()->setIntendedUrl($request->fullUrl());
         }
 
-        return view('aspiration.success', compact('aspiration', 'token'));
+        return view('aspiration.view', [
+            'aspiration' => $aspiration,
+            'canManage' => $user?->can('update', $aspiration) ?? false,
+            'canReport' => $user?->can('report', $aspiration) ?? false,
+            'hasReported' => $user && ! $user->isAdmin() && ! $aspiration->isAuthoredBy($user)
+                && $aspiration->reports()->where('reporter_hash', AnonymousIdentity::reporterHash($user))->exists(),
+            'reportReasons' => config('pengaduan.report_reasons'),
+        ]);
     }
 
-    public function show($id)
+    public function edit(Aspiration $aspiration)
     {
-        $aspiration = Aspiration::with(['category', 'comments' => function ($q) {
-            $q->latest();
-        }])->findOrFail($id);
+        Gate::authorize('update', $aspiration);
 
-        // Check if the user owns this aspiration (has token in session)
-        $myTokens = session()->get('my_aspiration_tokens', []);
-        $isOwner = in_array($aspiration->owner_token, $myTokens);
-
-        return view('aspiration.view', compact('aspiration', 'isOwner'));
-    }
-
-    public function edit(Request $request, $id)
-    {
-        $aspiration = Aspiration::findOrFail($id);
         $categories = Category::orderBy('nama_kategori')->get();
 
-        $token     = $request->input('token');
-        $myTokens  = session()->get('my_aspiration_tokens', []);
-        $hasAccess = in_array($aspiration->owner_token, $myTokens);
-
-        // Token submitted but wrong — redirect back with error so the modal auto-opens
-        if ($token && $token !== $aspiration->owner_token && !$hasAccess) {
-            return redirect()
-                ->route('aspirasi.show', $aspiration->id)
-                ->with('token_error', 'Token yang Anda masukkan salah. Silakan periksa kembali.');
-        }
-
-        // No token and not in session — show verify page
-        if (!$token && !$hasAccess) {
-            return view('aspiration.verify_token', compact('aspiration'));
-        }
-
-        // Valid token — save to session for convenience
-        if ($token === $aspiration->owner_token && !$hasAccess) {
-            session()->push('my_aspiration_tokens', $token);
-        }
-
-        return view('aspiration.edit', compact('aspiration', 'categories', 'token'));
+        return view('aspiration.edit', compact('aspiration', 'categories'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Aspiration $aspiration)
     {
-        $aspiration = Aspiration::findOrFail($id);
+        Gate::authorize('update', $aspiration);
 
-        $validatedData = $request->validate([
+        $aspiration->update($request->validate([
             'judul' => 'required|string|max:255',
             'isi' => 'required|string|max:10000',
             'category_id' => 'required|exists:categories,id',
-            'token' => 'nullable|string',
-        ]);
+        ]));
 
-        $token = $request->input('token');
-        $myTokens = session()->get('my_aspiration_tokens', []);
-
-        if ($token !== $aspiration->owner_token && !in_array($aspiration->owner_token, $myTokens)) {
-            return redirect()->route('aspirasi.show', $aspiration->id)
-                ->with('error', 'Token pemilik tidak valid atau Anda tidak memiliki akses.');
-        }
-
-        $aspiration->update([
-            'judul' => $validatedData['judul'],
-            'isi' => $validatedData['isi'],
-            'category_id' => $validatedData['category_id'],
-        ]);
-
-        return redirect()->route('aspirasi.show', $aspiration->id)->with('success', 'Aspirasi berhasil diperbarui.');
+        return redirect()->route('aspirasi.show', $aspiration)->with('success', 'Aspirasi berhasil diperbarui.');
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Aspiration $aspiration)
     {
-        $aspiration = Aspiration::findOrFail($id);
-        $token = $request->input('token');
-        $myTokens = session()->get('my_aspiration_tokens', []);
-
-        if ($token !== $aspiration->owner_token && !in_array($aspiration->owner_token, $myTokens)) {
-            return redirect()->route('aspirasi.show', $aspiration->id)
-                ->with('error', 'Token pemilik tidak valid atau Anda tidak memiliki akses.');
-        }
+        Gate::authorize('delete', $aspiration);
 
         $aspiration->delete();
 
-        return redirect()->route('aspirasi.index')->with('success', 'Aspirasi berhasil dihapus.');
+        return redirect()->route('my.aspirations')->with('success', 'Aspirasi berhasil dihapus.');
     }
 }

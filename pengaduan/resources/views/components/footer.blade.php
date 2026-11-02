@@ -4,9 +4,7 @@
             <p>Copyright &copy; 2026 Pengaduan Masyarakat</p>
         </div>
         <div class="flex gap-4">
-            <a href="#" class="hover:underline">Bantuan</a>
-            <a href="#" class="hover:underline">Privasi</a>
-            <a href="#" class="hover:underline">Persyaratan</a>
+            <a href="/about#privasi" class="inline-flex items-center min-h-11 hover:underline">Privasi</a>
         </div>
     </div>
 </footer>

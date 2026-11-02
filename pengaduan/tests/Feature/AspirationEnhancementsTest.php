@@ -4,124 +4,110 @@ namespace Tests\Feature;
 
 use App\Models\Aspiration;
 use App\Models\Category;
+use App\Models\User;
+use App\Support\AnonymousIdentity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AspirationEnhancementsTest extends TestCase
 {
     use RefreshDatabase;
 
-    private $category;
-    private $aspiration;
+    private Category $category;
+
+    private User $owner;
+
+    private Aspiration $aspiration;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->category = Category::create([
-            'nama_kategori' => 'Layanan',
-            'deskripsi' => 'Kategori Layanan',
-        ]);
+        $this->category = Category::create(['nama_kategori' => 'Layanan']);
+        $this->owner = User::factory()->create();
 
-        $this->aspiration = Aspiration::create([
+        $this->aspiration = new Aspiration([
             'judul' => 'Judul Aspirasi',
             'isi' => 'Isi detail aspirasi publik.',
             'category_id' => $this->category->id,
-            'owner_token' => Str::uuid(),
         ]);
+        $this->aspiration->author_hash = AnonymousIdentity::authorHash($this->owner);
+        $this->aspiration->save();
     }
 
     public function test_user_can_upvote_and_downvote_aspiration(): void
     {
-        // First upvote
-        $response = $this->post("/aspirasi/{$this->aspiration->id}/vote", [
-            'vote_type' => 'upvote',
-        ]);
-
-        $response->assertRedirect();
+        $this->post("/aspirasi/{$this->aspiration->id}/vote", ['vote_type' => 'upvote'])->assertRedirect();
         $this->assertEquals(1, $this->aspiration->fresh()->upvote);
-        $this->assertEquals(0, $this->aspiration->fresh()->downvote);
 
-        // Toggle vote (same vote type cancels it)
-        $response = $this->post("/aspirasi/{$this->aspiration->id}/vote", [
-            'vote_type' => 'upvote',
-        ]);
-
-        $response->assertRedirect();
+        // Same vote type again cancels it.
+        $this->post("/aspirasi/{$this->aspiration->id}/vote", ['vote_type' => 'upvote'])->assertRedirect();
         $this->assertEquals(0, $this->aspiration->fresh()->upvote);
 
-        // Switch to downvote
-        $response = $this->post("/aspirasi/{$this->aspiration->id}/vote", [
-            'vote_type' => 'downvote',
-        ]);
-
-        $response->assertRedirect();
+        $this->post("/aspirasi/{$this->aspiration->id}/vote", ['vote_type' => 'downvote'])->assertRedirect();
         $this->assertEquals(0, $this->aspiration->fresh()->upvote);
         $this->assertEquals(1, $this->aspiration->fresh()->downvote);
     }
 
-    public function test_user_can_comment_on_aspiration(): void
+    public function test_logged_in_user_can_comment_on_aspiration(): void
     {
-        $response = $this->post("/aspirasi/{$this->aspiration->id}/comment", [
-            'isi' => 'Komentar test publik.',
-        ]);
+        $this->actingAs($this->owner)->post("/aspirasi/{$this->aspiration->id}/comment", ['isi' => 'Komentar test publik.'])->assertRedirect();
 
-        $response->assertRedirect();
         $this->assertDatabaseHas('comments', [
             'aspiration_id' => $this->aspiration->id,
             'isi' => 'Komentar test publik.',
         ]);
     }
 
-    public function test_owner_can_edit_and_delete_aspiration_with_valid_token(): void
+    public function test_owner_can_edit_and_delete_own_aspiration(): void
     {
-        $token = (string) $this->aspiration->owner_token;
+        $this->actingAs($this->owner)->get("/aspirasi/{$this->aspiration->id}/edit")->assertOk();
 
-        // Try editing with token
-        $response = $this->get("/aspirasi/{$this->aspiration->id}/edit?token={$token}");
-        $response->assertStatus(200);
-
-        // Try updating
-        $response = $this->put("/aspirasi/{$this->aspiration->id}", [
+        $this->actingAs($this->owner)->put("/aspirasi/{$this->aspiration->id}", [
             'judul' => 'Judul Terupdate',
             'isi' => 'Isi Terupdate',
             'category_id' => $this->category->id,
-            'token' => $token,
-        ]);
+        ])->assertRedirect("/aspirasi/{$this->aspiration->id}");
 
-        $response->assertRedirect();
-        $this->assertDatabaseHas('aspirations', [
-            'id' => $this->aspiration->id,
-            'judul' => 'Judul Terupdate',
-        ]);
+        $this->assertDatabaseHas('aspirations', ['id' => $this->aspiration->id, 'judul' => 'Judul Terupdate']);
 
-        // Try deleting
-        $response = $this->delete("/aspirasi/{$this->aspiration->id}", [
-            'token' => $token,
-        ]);
-
-        $response->assertRedirect();
-        $this->assertDatabaseMissing('aspirations', [
-            'id' => $this->aspiration->id,
-        ]);
+        $this->actingAs($this->owner)->delete("/aspirasi/{$this->aspiration->id}")->assertRedirect('/my-aspirations');
+        $this->assertDatabaseMissing('aspirations', ['id' => $this->aspiration->id]);
     }
 
-    public function test_non_owner_cannot_edit_without_valid_token(): void
+    public function test_other_user_cannot_edit_or_delete(): void
     {
-        $response = $this->get("/aspirasi/{$this->aspiration->id}/edit?token=invalid-token");
-        $response->assertRedirect();
-        
-        $response = $this->put("/aspirasi/{$this->aspiration->id}", [
-            'judul' => 'Judul Terupdate',
-            'isi' => 'Isi Terupdate',
+        $stranger = User::factory()->create();
+
+        $this->actingAs($stranger)->get("/aspirasi/{$this->aspiration->id}/edit")->assertForbidden();
+        $this->actingAs($stranger)->put("/aspirasi/{$this->aspiration->id}", [
+            'judul' => 'Dibajak',
+            'isi' => 'Dibajak',
             'category_id' => $this->category->id,
-            'token' => 'invalid-token',
-        ]);
-        $response->assertRedirect();
-        $this->assertDatabaseHas('aspirations', [
-            'id' => $this->aspiration->id,
-            'judul' => 'Judul Aspirasi', // not changed
-        ]);
+        ])->assertForbidden();
+        $this->actingAs($stranger)->delete("/aspirasi/{$this->aspiration->id}")->assertForbidden();
+
+        $this->assertDatabaseHas('aspirations', ['id' => $this->aspiration->id, 'judul' => 'Judul Aspirasi']);
+    }
+
+    public function test_guest_is_redirected_to_login_for_write_actions(): void
+    {
+        $this->get('/aspirasi/create')->assertRedirect('/login');
+        $this->get("/aspirasi/{$this->aspiration->id}/edit")->assertRedirect('/login');
+        $this->delete("/aspirasi/{$this->aspiration->id}")->assertRedirect('/login');
+        $this->get('/my-aspirations')->assertRedirect('/login');
+    }
+
+    public function test_my_aspirations_lists_only_own_aspirations(): void
+    {
+        $stranger = User::factory()->create();
+        $other = new Aspiration(['judul' => 'Milik orang lain', 'isi' => 'x', 'category_id' => $this->category->id]);
+        $other->author_hash = AnonymousIdentity::authorHash($stranger);
+        $other->save();
+
+        $this->actingAs($this->owner)->get('/my-aspirations')
+            ->assertOk()
+            ->assertSee('Judul Aspirasi')
+            ->assertDontSee('Milik orang lain');
     }
 }

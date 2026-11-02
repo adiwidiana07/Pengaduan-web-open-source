@@ -2,30 +2,64 @@
 
 namespace Tests\Feature;
 
+use App\Models\Aspiration;
 use App\Models\Category;
+use App\Models\User;
+use App\Support\AnonymousIdentity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class AspirationPublicSubmissionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guests_can_submit_an_aspiration_and_be_redirected_to_the_public_index(): void
-    {
-        $category = Category::create([
-            'nama_kategori' => 'Layanan',
-            'deskripsi' => 'Test category',
-        ]);
+    private Category $category;
 
-        $response = $this->post('/aspirasi', [
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->category = Category::create(['nama_kategori' => 'Layanan']);
+    }
+
+    public function test_logged_in_user_can_submit_and_it_is_stored_without_user_id(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/aspirasi', [
             'judul' => 'Aspirasi publik',
             'isi' => 'Isi aspirasi publik',
-            'category_id' => $category->id,
+            'category_id' => $this->category->id,
         ]);
 
-        $response->assertRedirectContains('/success');
-        $this->assertDatabaseHas('aspirations', [
-            'judul' => 'Aspirasi publik',
-        ]);
+        $aspiration = Aspiration::firstOrFail();
+        $response->assertRedirect("/aspirasi/{$aspiration->id}");
+
+        $this->assertFalse(Schema::hasColumn('aspirations', 'user_id'));
+        $this->assertSame(AnonymousIdentity::authorHash($user), $aspiration->author_hash);
+        $this->assertNotSame((string) $user->id, $aspiration->author_hash);
+    }
+
+    public function test_guest_cannot_submit(): void
+    {
+        $this->post('/aspirasi', [
+            'judul' => 'Aspirasi tamu',
+            'isi' => 'Isi',
+            'category_id' => $this->category->id,
+        ])->assertRedirect('/login');
+
+        $this->assertDatabaseCount('aspirations', 0);
+    }
+
+    public function test_admin_cannot_create_aspirations(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->get('/aspirasi/create')->assertForbidden();
+        $this->actingAs($admin)->post('/aspirasi', [
+            'judul' => 'x',
+            'isi' => 'x',
+            'category_id' => $this->category->id,
+        ])->assertForbidden();
     }
 }

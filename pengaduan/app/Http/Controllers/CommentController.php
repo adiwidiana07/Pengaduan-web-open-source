@@ -17,17 +17,11 @@ class CommentController extends Controller
             'isi' => 'required|string|max:1000',
         ]);
 
-        // Generate or get voter token to serve as owner token for comment (so they can identify themselves or delete in future)
-        $ownerToken = session()->get('voter_token');
-        if (!$ownerToken) {
-            $ownerToken = (string) Str::uuid();
-            session()->put('voter_token', $ownerToken);
-        }
-
+        // Kode acak baru per komentar: tidak terhubung ke akun, sesi, atau komentar lain dari orang yang sama.
         Comment::create([
             'aspiration_id' => $aspiration->id,
             'isi' => $validatedData['isi'],
-            'owner_token' => $ownerToken,
+            'owner_token' => (string) Str::uuid(),
         ]);
 
         return redirect()->back()->with('success', 'Komentar Anda berhasil ditambahkan.');

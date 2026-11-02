@@ -36,7 +36,7 @@ class AuthTest extends TestCase
      */
     public function test_admin_can_login_with_valid_credentials()
     {
-        $user = User::factory()->create([
+        $user = User::factory()->admin()->create([
             'email' => 'admin@pengaduan.id',
             'password' => bcrypt('password'),
         ]);
@@ -87,7 +87,7 @@ class AuthTest extends TestCase
      */
     public function test_authenticated_admin_can_access_dashboard_routes()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this->actingAs($user)->get('/dashboard');
         $response->assertStatus(200);
@@ -99,6 +99,12 @@ class AuthTest extends TestCase
         $response->assertStatus(200);
 
         $response = $this->actingAs($user)->get('/dashboard/profil');
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($user)->get('/dashboard/laporan');
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($user)->get('/dashboard/aspirasi');
         $response->assertStatus(200);
     }
 }

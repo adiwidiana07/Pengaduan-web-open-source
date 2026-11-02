@@ -63,7 +63,6 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 text-gray-500 text-xs font-semibold uppercase border-b border-gray-200">
-                        <th class="px-6 py-4">Pelapor (Token)</th>
                         <th class="px-6 py-4">Judul Pengaduan</th>
                         <th class="px-6 py-4">Kategori</th>
                         <th class="px-6 py-4">Dukungan</th>
@@ -73,7 +72,6 @@
                 <tbody class="divide-y divide-gray-200 text-sm">
                     @forelse($latestAspirations as $aspiration)
                         <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-semibold text-gray-900">Anonim ({{ substr($aspiration->owner_token, 0, 8) }})</td>
                             <td class="px-6 py-4">
                                 <a href="{{ route('admin.aspirasi.show', $aspiration->id) }}" class="text-gray-600 hover:text-indigo-600 transition-colors">
                                     {{ $aspiration->judul }}
@@ -92,7 +90,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-gray-500 font-medium">
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-500 font-medium">
                                 Belum ada pengaduan masuk.
                             </td>
                         </tr>

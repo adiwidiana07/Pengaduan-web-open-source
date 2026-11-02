@@ -17,12 +17,15 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@pengaduan.id')],
             [
                 'name' => 'Administrator',
                 'password' => bcrypt(env('ADMIN_PASSWORD', 'password')),
             ]
         );
+
+        // role sengaja tidak mass-assignable, jadi diset langsung.
+        $admin->forceFill(['role' => User::ROLE_ADMIN])->save();
     }
 }

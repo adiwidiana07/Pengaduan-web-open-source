@@ -53,7 +53,7 @@
                 <div class="relative">
                     <input type="password" name="password" id="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                         class="w-full px-4 py-2.5 border @error('password') border-red-300 focus:border-red-500 focus:ring-red-500 @else border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 @enderror rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-1 transition-colors pr-10">
-                    <button type="button" data-toggle-password="password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">&#128065;</button>
+                    <button type="button" data-toggle-password="password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 text-sm">&#128065;</button>
                 </div>
                 @error('password')
                     <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>
@@ -65,7 +65,7 @@
                 <div class="relative">
                     <input type="password" name="password_confirmation" id="password_confirmation" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors pr-10">
-                    <button type="button" data-toggle-password="password_confirmation" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">&#128065;</button>
+                    <button type="button" data-toggle-password="password_confirmation" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 text-sm">&#128065;</button>
                 </div>
             </div>
         </div>

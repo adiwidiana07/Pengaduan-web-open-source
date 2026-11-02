@@ -22,6 +22,15 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLE_USER = 'user';
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
     protected function casts(): array
     {
         return [

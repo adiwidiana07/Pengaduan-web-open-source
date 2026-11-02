@@ -1,94 +1,76 @@
 @extends('layouts.app')
 
-@section('title', 'Tentang Kami - Pengaduan')
+@section('title', 'Tentang - Pengaduan')
 
 @section('content')
-<div class="bg-[#fafafa]">
-    <!-- Hero Section -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-            Tentang <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Pengaduan</span>
-        </h1>
-        <p class="mt-4 text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Menjembatani aspirasi masyarakat dengan transparansi penuh untuk menciptakan perubahan positif di lingkungan sekitar.
+<div class="w-full max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+
+    <h1 class="font-serif text-4xl sm:text-5xl font-bold leading-tight text-gray-900">Tentang Pengaduan</h1>
+    <p class="mt-5 text-lg text-gray-700 leading-relaxed">
+        Menjembatani aspirasi masyarakat dengan transparansi penuh untuk menciptakan perubahan positif di lingkungan sekitar.
+    </p>
+
+    <section aria-labelledby="misi" class="mt-14">
+        <h2 id="misi" class="font-serif text-2xl font-semibold text-gray-900 border-b-2 border-gray-900 pb-2">Misi</h2>
+        <p class="mt-4 text-base text-gray-700 leading-relaxed">
+            Memberikan wadah penyampaian keluhan dan aspirasi publik secara gratis, aman, dan tanpa hambatan birokrasi yang rumit demi perbaikan sarana pelayanan publik.
         </p>
-    </div>
+    </section>
 
-    <!-- Mission & Vision -->
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white border border-gray-200/80 p-8 rounded-2xl shadow-sm">
-                <div class="text-3xl mb-4">🎯</div>
-                <h2 class="text-xl font-bold text-gray-900">Misi Kami</h2>
-                <p class="mt-3 text-sm text-gray-600 leading-relaxed">
-                    Memberikan wadah penyampaian keluhan dan aspirasi publik secara gratis, aman, dan tanpa hambatan birokrasi yang rumit demi perbaikan sarana pelayanan publik.
-                </p>
-            </div>
-            <div class="bg-white border border-gray-200/80 p-8 rounded-2xl shadow-sm">
-                <div class="text-3xl mb-4">🛡️</div>
-                <h2 class="text-xl font-bold text-gray-900">Privasi & Keamanan</h2>
-                <p class="mt-3 text-sm text-gray-600 leading-relaxed">
-                    Kami sangat mengutamakan anonimitas pelapor. Sistem kami tidak melacak identitas pribadi Anda, melainkan menggunakan token unik agar Anda dapat memantau aspirasi secara aman.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- How It Works Section -->
-    <div class="bg-white border-t border-b border-gray-200/80 py-16">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 text-center tracking-tight">Cara Kerja Platform</h2>
-            <p class="mt-2 text-sm text-gray-500 text-center">Tiga langkah mudah menyampaikan suara Anda.</p>
-
-            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Step 1 -->
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-lg font-bold mx-auto mb-4 border border-indigo-100">
-                        1
-                    </div>
-                    <h3 class="font-bold text-gray-900">Tulis Aspirasi</h3>
-                    <p class="mt-2 text-xs sm:text-sm text-gray-500 leading-relaxed px-4">
-                        Isi judul, pilih kategori keluhan, dan deskripsikan aspirasi Anda dengan detail.
-                    </p>
+    <section aria-labelledby="alur" class="mt-14">
+        <h2 id="alur" class="font-serif text-2xl font-semibold text-gray-900 border-b-2 border-gray-900 pb-2">Alur sebuah aspirasi</h2>
+        <ol class="mt-6 space-y-6">
+            <li class="grid grid-cols-[2.5rem_1fr] gap-x-2">
+                <span class="font-serif text-2xl font-bold text-indigo-700 leading-none">1.</span>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Daftar dan tulis</h3>
+                    <p class="mt-1 text-sm text-gray-700 leading-relaxed">Buat akun, pilih kategori, lalu jelaskan aspirasi Anda. Aspirasi langsung tercatat dengan nomor register dan tampil sebagai Anonim.</p>
                 </div>
-
-                <!-- Step 2 -->
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-lg font-bold mx-auto mb-4 border border-indigo-100">
-                        2
-                    </div>
-                    <h3 class="font-bold text-gray-900">Pantau & Bagikan</h3>
-                    <p class="mt-2 text-xs sm:text-sm text-gray-500 leading-relaxed px-4">
-                        Dapatkan token kepemilikan unik setelah mengirim untuk memantau diskusi dan respon dari pihak berwenang.
-                    </p>
+            </li>
+            <li class="grid grid-cols-[2.5rem_1fr] gap-x-2">
+                <span class="font-serif text-2xl font-bold text-indigo-700 leading-none">2.</span>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Warga mendukung dan berdiskusi</h3>
+                    <p class="mt-1 text-sm text-gray-700 leading-relaxed">Siapa pun bisa membaca dan menyatakan setuju atau tidak setuju. Untuk berkomentar, warga perlu masuk akun. Anda bisa mengubah atau menghapus aspirasi sendiri dari halaman Aspirasi Saya.</p>
                 </div>
-
-                <!-- Step 3 -->
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-lg font-bold mx-auto mb-4 border border-indigo-100">
-                        3
-                    </div>
-                    <h3 class="font-bold text-gray-900">Dapatkan Respon</h3>
-                    <p class="mt-2 text-xs sm:text-sm text-gray-500 leading-relaxed px-4">
-                        Aspirasi didukung publik melalui voting serta dibahas bersama secara transparan hingga mendapat tanggapan admin.
-                    </p>
+            </li>
+            <li class="grid grid-cols-[2.5rem_1fr] gap-x-2">
+                <span class="font-serif text-2xl font-bold text-indigo-700 leading-none">3.</span>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Warga melaporkan yang bermasalah</h3>
+                    <p class="mt-1 text-sm text-gray-700 leading-relaxed">Aspirasi berisi spam, ujaran kebencian, informasi palsu, atau data pribadi orang lain bisa dilaporkan. Satu akun hanya bisa melapor sekali per aspirasi.</p>
                 </div>
+            </li>
+            <li class="grid grid-cols-[2.5rem_1fr] gap-x-2">
+                <span class="font-serif text-2xl font-bold text-indigo-700 leading-none">4.</span>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Admin meninjau</h3>
+                    <p class="mt-1 text-sm text-gray-700 leading-relaxed">Admin baru dapat menghapus sebuah aspirasi setelah menerima {{ config('pengaduan.report_threshold') }} laporan. Admin tidak bisa menghapus aspirasi hanya karena tidak setuju dengan isinya.</p>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <section id="privasi" aria-labelledby="privasi-title" class="mt-14 scroll-mt-6">
+        <h2 id="privasi-title" class="font-serif text-2xl font-semibold text-gray-900 border-b-2 border-gray-900 pb-2">Privasi</h2>
+        <dl class="mt-6 space-y-5">
+            <div>
+                <dt class="font-semibold text-gray-900">Apa yang terlihat oleh publik?</dt>
+                <dd class="mt-1 text-sm text-gray-700 leading-relaxed">Judul, isi, kategori, tanggal, jumlah dukungan, dan komentar. Penulis selalu ditampilkan sebagai Anonim.</dd>
             </div>
-        </div>
-    </div>
-
-    <!-- Action Section -->
-    <div class="max-w-4xl mx-auto px-4 py-16 text-center">
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Siap untuk Bersuara?</h2>
-        <p class="mt-2 text-sm text-gray-500">Kirim keluhan atau dukung aspirasi masyarakat sekarang juga.</p>
-        <div class="mt-6 flex justify-center gap-3">
-            <a href="/aspirasi/create" class="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-lg shadow-sm">
-                Tulis Aspirasi
-            </a>
-            <a href="/aspirasi" class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 transition-colors rounded-lg shadow-sm">
-                Lihat Daftar Suara
-            </a>
-        </div>
-    </div>
+            <div>
+                <dt class="font-semibold text-gray-900">Apa yang terlihat oleh admin?</dt>
+                <dd class="mt-1 text-sm text-gray-700 leading-relaxed">Hal yang sama dengan publik, ditambah jumlah dan alasan laporan. Admin tidak melihat siapa penulis aspirasi maupun siapa yang melapor.</dd>
+            </div>
+            <div>
+                <dt class="font-semibold text-gray-900">Apa yang disimpan tentang akun saya?</dt>
+                <dd class="mt-1 text-sm text-gray-700 leading-relaxed">Nama, email, dan kata sandi (disimpan sebagai hash, bukan teks asli) untuk masuk. Aspirasi dan laporan tidak menyimpan akun Anda, hanya kode acak (hash) yang dihitung dengan kunci rahasia server. Tanpa kunci itu, kode tersebut tidak dapat dihubungkan kembali ke akun.</dd>
+            </div>
+            <div>
+                <dt class="font-semibold text-gray-900">Bagaimana dengan dukungan dan komentar?</dt>
+                <dd class="mt-1 text-sm text-gray-700 leading-relaxed">Dukungan bisa diberikan tanpa masuk akun. Komentar perlu akun, tetapi yang disimpan hanya isi komentar dan kode acak baru untuk setiap komentar, bukan akun Anda. Komentar tampil sebagai Anonim.
+            </div>
+        </dl>
+    </section>
 </div>
 @endsection

@@ -1,46 +1,60 @@
 <?php
 
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\Admin\AspirationController as AdminAspirationController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\StatisticController;
 use App\Http\Controllers\AspirationController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\StatisticController;
-use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\AspirationController as AdminAspirationController;
-use App\Http\Controllers\MyAspirationController;
-use App\Http\Controllers\VoteController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\AboutController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MyAspirationController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('index');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 
+// Akun masyarakat: menulis, mengubah, menghapus, mengomentari, dan melaporkan aspirasi.
+// Harus didaftarkan sebelum /aspirasi/{aspiration} agar "create" tidak dianggap ID.
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/aspirasi/create', [AspirationController::class, 'create'])->name('aspirasi.create');
+    Route::post('/aspirasi', [AspirationController::class, 'store'])->middleware('throttle:posting')->name('aspirasi.store');
+    Route::get('/aspirasi/{aspiration}/edit', [AspirationController::class, 'edit'])->name('aspirasi.edit');
+    Route::put('/aspirasi/{aspiration}', [AspirationController::class, 'update'])->name('aspirasi.update');
+    Route::delete('/aspirasi/{aspiration}', [AspirationController::class, 'destroy'])->name('aspirasi.destroy');
+    Route::post('/aspirasi/{aspiration}/comment', [CommentController::class, 'store'])->middleware('throttle:posting')->name('aspirasi.comment');
+    Route::post('/aspirasi/{aspiration}/report', [ReportController::class, 'store'])->middleware('throttle:posting')->name('aspirasi.report');
+    Route::get('/my-aspirations', [MyAspirationController::class, 'index'])->name('my.aspirations');
+});
+
 Route::get('/aspirasi', [AspirationController::class, 'index'])->name('aspirasi.index');
-Route::get('/aspirasi/create', [AspirationController::class, 'create'])->name('aspirasi.create');
-Route::post('/aspirasi', [AspirationController::class, 'store'])->name('aspirasi.store');
-Route::get('/aspirasi/{aspiration}/success', [AspirationController::class, 'success'])->name('aspirasi.success');
 Route::get('/aspirasi/{aspiration}', [AspirationController::class, 'show'])->name('aspirasi.show');
 Route::post('/aspirasi/{aspiration}/vote', [VoteController::class, 'vote'])->name('aspirasi.vote');
-Route::post('/aspirasi/{aspiration}/comment', [CommentController::class, 'store'])->name('aspirasi.comment');
-Route::get('/aspirasi/{aspiration}/edit', [AspirationController::class, 'edit'])->name('aspirasi.edit');
-Route::put('/aspirasi/{aspiration}', [AspirationController::class, 'update'])->name('aspirasi.update');
-Route::delete('/aspirasi/{aspiration}', [AspirationController::class, 'destroy'])->name('aspirasi.destroy');
 
-Route::get('/my-aspirations', [MyAspirationController::class, 'index'])->name('my.aspirations');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:login');
+    Route::get('/register', [RegisterController::class, 'show'])->name('register');
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:register');
+});
+Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-Route::prefix('dashboard')->middleware('auth')->group(function () {
-    Route::get('/', [DashboardController::class, 'index']);
+Route::prefix('dashboard')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/aspirasi', [AdminAspirationController::class, 'index'])->name('admin.aspirasi.index');
     Route::get('/aspirasi/{aspiration}', [AdminAspirationController::class, 'show'])->name('admin.aspirasi.show');
+    Route::delete('/aspirasi/{aspiration}', [AdminAspirationController::class, 'destroy'])->name('admin.aspirasi.destroy');
+
+    Route::get('/laporan', [AdminReportController::class, 'index'])->name('admin.laporan.index');
+    Route::delete('/laporan/{aspiration}', [AdminReportController::class, 'dismiss'])->name('admin.laporan.dismiss');
 
     Route::get('/kategori', [CategoryController::class, 'index'])->name('kategori.index');
     Route::get('/kategori/create', [CategoryController::class, 'create'])->name('kategori.create');

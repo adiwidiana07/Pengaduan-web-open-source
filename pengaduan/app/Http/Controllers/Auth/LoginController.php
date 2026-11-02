@@ -9,20 +9,15 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    /**
-     * Show the admin login form.
-     */
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect()->intended('/dashboard');
+            return redirect($this->homeFor(Auth::user()));
         }
+
         return view('login');
     }
 
-    /**
-     * Handle authentication attempt.
-     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -30,20 +25,24 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended('/dashboard');
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            throw ValidationException::withMessages([
+                'email' => 'Email atau password yang Anda masukkan salah.',
+            ]);
         }
 
-        throw ValidationException::withMessages([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ]);
+        $request->session()->regenerate();
+
+        // Admin hanya kembali ke halaman dashboard; warga tidak pernah diarahkan ke dashboard.
+        $intended = (string) $request->session()->get('url.intended', '');
+        $intendedIsDashboard = str_starts_with(parse_url($intended, PHP_URL_PATH) ?? '', '/dashboard');
+        if ($intended !== '' && $request->user()->isAdmin() !== $intendedIsDashboard) {
+            $request->session()->forget('url.intended');
+        }
+
+        return redirect()->intended($this->homeFor($request->user()));
     }
 
-    /**
-     * Log the user out of the application.
-     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -52,5 +51,10 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/login')->with('success', 'Anda telah berhasil keluar.');
+    }
+
+    private function homeFor($user): string
+    {
+        return $user->isAdmin() ? '/dashboard' : route('my.aspirations');
     }
 }
